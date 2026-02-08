@@ -1,0 +1,85 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+const textToType = "The quick brown fox jumps over the lazy dog. Practice makes perfect.";
+
+const TypingTest = () => {
+  const [userInput, setUserInput] = useState("");
+  const [startTime, setStartTime] = useState(null);
+  const [wpm, setWpm] = useState(0);
+  const [accuracy, setAccuracy] = useState(100);
+  const [isFinished, setIsFinished] = useState(false);
+  
+  const inputRef = useRef(null);
+
+  // WPM aur Accuracy Calculate karne ka function
+  useEffect(() => {
+    if (userInput.length > 0 && !isFinished) {
+      const timeElapsed = (Date.now() - startTime) / 60000; // minutes me
+      const wordsTyped = userInput.length / 5;
+      const currentWpm = Math.round(wordsTyped / timeElapsed);
+      
+      let errors = 0;
+      for (let i = 0; i < userInput.length; i++) {
+        if (userInput[index] !== textToType[index]) errors++;
+      }
+      
+      const currentAcc = Math.round(((userInput.length - errors) / userInput.length) * 100);
+      
+      setWpm(currentWpm || 0);
+      setAccuracy(currentAcc || 100);
+
+      if (userInput.length === textToType.length) {
+        setIsFinished(true);
+      }
+    }
+  }, [userInput]);
+
+  const handleInputChange = (e) => {
+    if (!startTime) setStartTime(Date.now());
+    if (!isFinished) setUserInput(e.target.value);
+  };
+
+  return (
+    <div className="p-10 max-w-4xl mx-auto font-sans">
+      <h1 className="text-2xl font-bold mb-4">Hindi/English Typing Test</h1>
+      
+      {/* Stats Display */}
+      <div className="flex gap-10 mb-5 bg-gray-100 p-4 rounded-lg">
+        <div>WPM: <span className="font-bold text-blue-600">{wpm}</span></div>
+        <div>Accuracy: <span className="font-bold text-green-600">{accuracy}%</span></div>
+        <div>Status: {isFinished ? "Completed" : "Typing..."}</div>
+      </div>
+
+      {/* Text Display Area */}
+      <div className="relative p-6 border rounded-md bg-white shadow-sm text-xl leading-relaxed mb-4 min-h-[150px]">
+        <div className="absolute top-6 left-6 right-6 pointer-events-none">
+          {textToType.split("").map((char, index) => {
+            let color = "text-gray-400"; // Default
+            if (index < userInput.length) {
+              color = userInput[index] === char ? "text-green-600" : "text-white bg-red-500";
+            }
+            return <span key={index} className={color}>{char}</span>;
+          })}
+        </div>
+        
+        {/* Hidden Input Field */}
+        <textarea
+          ref={inputRef}
+          value={userInput}
+          onChange={handleInputChange}
+          className="w-full h-full opacity-0 absolute inset-0 cursor-default resize-none"
+          autoFocus
+        />
+      </div>
+
+      <button 
+        onClick={() => window.location.reload()}
+        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Restart Test
+      </button>
+    </div>
+  );
+};
+
+export default TypingTest;
